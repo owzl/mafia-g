@@ -40,7 +40,11 @@ public class PlayUI extends JFrame implements ActionListener {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // 기본 종료 막기
         setLayout(new BorderLayout());
         setupUI();
-        connectToServer();
+//        connectToServer();
+        new Thread(() -> {
+            connectToServer();
+        }).start();
+        
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -50,18 +54,32 @@ public class PlayUI extends JFrame implements ActionListener {
                     "종료 확인",
                     JOptionPane.YES_NO_OPTION
                 );
+                
+                System.out.println("종료 요청 확인됨");
+                
                 if (result == JOptionPane.YES_OPTION) {
+                	System.out.println("정리 작업 시작");
+                	
                     // 타이머 정리
                     if (questionTimer != null) questionTimer.cancel();
 
-                    // 네트워크 자원 정리
+                 // 네트워크 자원 정리
                     closeConnection();
-
-                    // 창 종료
+                    System.out.println("연결 종료");
+                    sendToServer("{\"type\":\"quit\"}");
+                    try {
+                        Thread.sleep(1000); // 자원 해제 대기
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    
+                 // 창 종료
                     dispose();
-
-                    // 모든 스레드 정리 후 강제 종료
+                    
+                 // 모든 스레드 정리 후 강제 종료
                     System.exit(0);
+                    System.out.println("완전 종료");
+                    
                 }
             }
         });
@@ -168,7 +186,7 @@ public class PlayUI extends JFrame implements ActionListener {
     }
 
     private void connectToServer() {
-        try {
+        try {        	
             sock = new Socket("localhost", 3579);
             bw = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -204,6 +222,8 @@ public class PlayUI extends JFrame implements ActionListener {
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "서버 연결에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            // 창 안 닫히는 문제 때문에 추가
+            dispose();
         }
     }
 
@@ -220,13 +240,34 @@ public class PlayUI extends JFrame implements ActionListener {
     }
 
     private void closeConnection() {
-        try {
-            if (br != null) br.close();
-            if (bw != null) bw.close();
-            if (sock != null) sock.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    	// 수정   	
+    	try {
+    	    if (sock != null && !sock.isClosed()) {
+    	        sock.shutdownInput();  // 👈 먼저 입력 스트림 닫기
+    	        sock.shutdownOutput(); // 👈 출력도 명시적으로 종료
+    	    }
+    	} catch (IOException e) {
+    	    e.printStackTrace();
+    	    System.err.println("sock 닫기 실패: " + e.getMessage());
+    	}
+    	
+    	    try {
+    	        if (br != null) {
+    	            br.close();
+    	        }
+    	    } catch (IOException e) {
+    	        System.err.println("br 닫기 실패: " + e.getMessage());
+    	    }
+
+    	    try {
+    	        if (bw != null) {
+    	            bw.close();
+    	        }
+    	    } catch (IOException e) {
+    	        System.err.println("bw 닫기 실패: " + e.getMessage());
+    	    }
+    	
+    	
     }
 
 }

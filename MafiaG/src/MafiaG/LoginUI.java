@@ -145,12 +145,19 @@ public class LoginUI {
 					pb.start();
 
 					System.out.println("서버 실행 성공");
+					
+					// 서버가 완전히 켜지기 전까지 1초 대기
+				    try {
+				        Thread.sleep(1000);
+				    } catch (InterruptedException ex) {
+				        ex.printStackTrace();
+				    }
 
 				} catch (IOException ex) {
 					ex.printStackTrace();
 					JOptionPane.showMessageDialog(null, "서버 실행에 실패했습니다: " + ex.getMessage());
 				}
-
+				
 //				new PlayUI(); // 게임 UI 실행
 		        SwingUtilities.invokeLater(() -> {
 		            PlayUI playUI = new PlayUI();
