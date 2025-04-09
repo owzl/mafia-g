@@ -126,4 +126,6 @@ public class MafiaGResult extends JFrame {
             g2d.fillRect(0, 0, width, height);
         }
     }
+    
+    
 }
