@@ -6,7 +6,7 @@ import DB.DatabaseManager;
 
 public class FindAccountUI extends JFrame {
     public FindAccountUI(Runnable backToLogin) {
-        setTitle("¾ÆÀÌµğ/ºñ¹Ğ¹øÈ£ Ã£±â");
+        setTitle("ì•„ì´ë””/ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸°");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -22,7 +22,7 @@ public class FindAccountUI extends JFrame {
         innerBox.setLayout(new BoxLayout(innerBox, BoxLayout.Y_AXIS));
         innerBox.setMaximumSize(new Dimension(700, Integer.MAX_VALUE));
 
-        // ·Î°í
+        // ë¡œê³ 
         JPanel logoZone = new JPanel();
         logoZone.setOpaque(false);
         JLabel logoLabel = new JLabel();
@@ -37,40 +37,40 @@ public class FindAccountUI extends JFrame {
         logoLabel.setIcon(new ImageIcon(rawImage.getScaledInstance(width, height, Image.SCALE_SMOOTH)));
         logoZone.add(logoLabel);
 
-        // ¸Ş½ÃÁö Ãâ·Â¿ë ¶óº§
+        // ë©”ì‹œì§€ ì¶œë ¥ìš© ë¼ë²¨
         JLabel messageLabel = new JLabel(" ");
-        messageLabel.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 15));
+        messageLabel.setFont(new Font("ë§‘ì€ ê³ ë”•", Font.BOLD, 15));
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // ¾ÆÀÌµğ Ã£±â ¹Ú½º
-        JPanel idBox = createFindBox("¾ÆÀÌµğ Ã£±â", new String[]{"ÀÌ¸ŞÀÏ"}, (inputs) -> {
+        // ì•„ì´ë”” ì°¾ê¸° ë°•ìŠ¤
+        JPanel idBox = createFindBox("ì•„ì´ë”” ì°¾ê¸°", new String[]{"ì´ë©”ì¼"}, (inputs) -> {
             String email = inputs[0].getText().trim();
             if (email.isEmpty()) {
-                setMessage(messageLabel, "ÀÌ¸ŞÀÏÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä.", false);
+                setMessage(messageLabel, "ì´ë©”ì¼ì„ ì…ë ¥í•´ì£¼ì„¸ìš”.", false);
                 return;
             }
             String foundId = DatabaseManager.findMemberIdByEmail(email);
             if (foundId != null) {
                 String maskedId = foundId.substring(0, 3) + repeatChar('*', Math.max(0, foundId.length() - 3));
-                setMessage(messageLabel, "ÀÔ·ÂÇÏ½Å ÀÌ¸ŞÀÏ·Î °¡ÀÔÇÑ ¾ÆÀÌµğ´Â " + maskedId + " ÀÔ´Ï´Ù.", true);
+                setMessage(messageLabel, "ì…ë ¥í•˜ì‹  ì´ë©”ì¼ë¡œ ê°€ì…í•œ ì•„ì´ë””ëŠ” " + maskedId + " ì…ë‹ˆë‹¤.", true);
             } else {
-                setMessage(messageLabel, "ÀÔ·ÂÇÏ½Å ÀÌ¸ŞÀÏ·Î °¡ÀÔÇÑ ¾ÆÀÌµğ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.", false);
+                setMessage(messageLabel, "ì…ë ¥í•˜ì‹  ì´ë©”ì¼ë¡œ ê°€ì…í•œ ì•„ì´ë””ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.", false);
             }
         });
 
-        // ºñ¹Ğ¹øÈ£ Ã£±â ¹Ú½º
-        JPanel pwBox = createFindBox("ºñ¹Ğ¹øÈ£ Ã£±â", new String[]{"¾ÆÀÌµğ", "ÀÌ¸ŞÀÏ"}, (inputs) -> {
+        // ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸° ë°•ìŠ¤
+        JPanel pwBox = createFindBox("ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸°", new String[]{"ì•„ì´ë””", "ì´ë©”ì¼"}, (inputs) -> {
             String id = inputs[0].getText().trim();
             String email = inputs[1].getText().trim();
             if (id.isEmpty() || email.isEmpty()) {
-                setMessage(messageLabel, "¾ÆÀÌµğ¿Í ÀÌ¸ŞÀÏÀ» ¸ğµÎ ÀÔ·ÂÇØÁÖ¼¼¿ä.", false);
+                setMessage(messageLabel, "ì•„ì´ë””ì™€ ì´ë©”ì¼ì„ ëª¨ë‘ ì…ë ¥í•´ì£¼ì„¸ìš”.", false);
                 return;
             }
             boolean match = DatabaseManager.findPasswordByEmailAndId(id, email);
             if (match) {
-                setMessage(messageLabel, "ºñ¹Ğ¹øÈ£ Àç¼³Á¤ ¸µÅ©¸¦ ÀÌ¸ŞÀÏ·Î ¹ß¼ÛÇß½À´Ï´Ù.", true);
+                setMessage(messageLabel, "ë¹„ë°€ë²ˆí˜¸ ì¬ì„¤ì • ë§í¬ë¥¼ ì´ë©”ì¼ë¡œ ë°œì†¡í–ˆìŠµë‹ˆë‹¤.", true);
             } else {
-                setMessage(messageLabel, "ÀÔ·ÂÇÏ½Å Á¤º¸·Î °¡ÀÔÇÑ °èÁ¤À» Ã£À» ¼ö ¾ø½À´Ï´Ù.", false);
+                setMessage(messageLabel, "ì…ë ¥í•˜ì‹  ì •ë³´ë¡œ ê°€ì…í•œ ê³„ì •ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.", false);
             }
         });
 
@@ -80,8 +80,8 @@ public class FindAccountUI extends JFrame {
         findZone.add(idBox);
         findZone.add(pwBox);
 
-        // µ¹¾Æ°¡±â ¹öÆ°
-        JButton backButton = new JButton("¸ŞÀÎ ÆäÀÌÁö·Î µ¹¾Æ°¡±â");
+        // ëŒì•„ê°€ê¸° ë²„íŠ¼
+        JButton backButton = new JButton("ë©”ì¸ í˜ì´ì§€ë¡œ ëŒì•„ê°€ê¸°");
         backButton.setMaximumSize(new Dimension(500, 90));
         backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         backButton.setBackground(new Color(204, 230, 255));
@@ -94,7 +94,7 @@ public class FindAccountUI extends JFrame {
             if (backToLogin != null) backToLogin.run();
         });
 
-        // Á¶¸³
+        // ì¡°ë¦½
         innerBox.add(logoZone);
         innerBox.add(Box.createVerticalStrut(10));
         innerBox.add(findZone);
@@ -171,7 +171,7 @@ public class FindAccountUI extends JFrame {
         label.setForeground(success ? new Color(119, 206, 105) : new Color(255, 91, 91));
     }
 
-    // Java 8 È£È¯¿ë repeat ÇÔ¼ö
+    // Java 8 í˜¸í™˜ìš© repeat í•¨ìˆ˜
     private String repeatChar(char c, int count) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < count; i++) {

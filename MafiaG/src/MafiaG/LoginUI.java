@@ -147,58 +147,72 @@ public class LoginUI {
 			String inputId = idField.getText();
 			String inputPw = new String(pwField.getPassword());
 
-			String nickname = DatabaseManager.checkLogin(inputId, inputPw);
+            // 1. 로그인 시도 및 실제 닉네임 확보
+			String nickname = DatabaseManager.checkLogin(inputId, inputPw); // nickname 변수에 실제 닉네임 저장됨
 			boolean success = nickname != null;
-			
+
 			System.out.println("로그인 시도: " + inputId + ", 성공 여부: " + success);
 
 			if (success) {
 				JOptionPane.showMessageDialog(frame, "로그인 성공!", "성공", JOptionPane.INFORMATION_MESSAGE);
-				frame.dispose();
+				frame.dispose(); // 현재 로그인 창 닫기
 
+                // --- 서버 실행 로직 (클래스패스 설정 포함) ---
 				try {
 					System.out.println("서버 실행 시도");
 
-//					String classPath = "bin";
-//					ProcessBuilder pb = new ProcessBuilder("java", "-cp", classPath, "MafiaG.Server");
-//					pb.inheritIO(); // 콘솔 출력을 공유
-//					pb.start();
-					
-					// 안통함
-					String jdbcPath = "lib/mysql-connector-java-9.2.0.jar";
+                    // 2. 서버 실행을 위한 클래스패스 설정 (libs 폴더 및 JAR 파일명 확인!)
+                    String jarFolderName = "libs"; // <-- 실제 폴더 이름 확인! (lib? libs?)
+                    String jarFileName = "mysql-connector-j-8.0.33.jar"; // <-- 실제 JAR 파일 이름 확인!
+					String jdbcPath = jarFolderName + "/" + jarFileName;
+					String separator = System.getProperty("path.separator");
+					String classPath = "bin" + separator + jdbcPath;
+                    //    다른 라이브러리(okhttp, okio 등)도 서버에서 필요하면 여기에 추가
+                    //    String okhttpPath = "libs/okhttp-3.14.9.jar";
+                    //    String okioPath = "libs/okio-1.17.5.jar";
+                    //    classPath += separator + okhttpPath + separator + okioPath;
+
+                    System.out.println("  사용될 서버 클래스패스: " + classPath); // 설정값 로그 확인
+
 					ProcessBuilder pb = new ProcessBuilder(
 					    "java",
 					    "-cp",
-					    "bin;" + jdbcPath,
+					    classPath, // 조합된 클래스패스 사용
 					    "MafiaG.Server"
 					);
-					pb.inheritIO(); // 콘솔 출력을 현재 프로세스와 공유
+					pb.inheritIO();
 					pb.start();
 
+					System.out.println("서버 실행 성공 (프로세스 시작됨)");
 
-					System.out.println("서버 실행 성공");
-					
-					// 서버가 완전히 켜지기 전까지 1초 대기
-				    try {
-				        Thread.sleep(1000);
-				    } catch (InterruptedException ex) {
-				        ex.printStackTrace();
-				    }
+					// 서버 부팅 대기 시간
+					try {
+						Thread.sleep(1500); // 1.5초 대기
+					} catch (InterruptedException ex) {
+						ex.printStackTrace();
+                        Thread.currentThread().interrupt();
+					}
 
 				} catch (IOException ex) {
 					ex.printStackTrace();
 					JOptionPane.showMessageDialog(null, "서버 실행에 실패했습니다: " + ex.getMessage());
+                    return; // 서버 실행 실패 시 더 이상 진행하지 않음
 				}
+                // --- 서버 실행 로직 끝 ---
 
-				// PlayUI 호출
+				// --- PlayUI 호출 시 실제 닉네임 전달 ---
+				final String finalNickname = nickname; // 람다 내부에서 사용하기 위해 final 변수로
 				SwingUtilities.invokeLater(() -> {
-					PlayUI playUI = new PlayUI();
-					playUI.setVisible(true); 
+                    // PlayUI 생성자에 실제 닉네임(finalNickname) 전달
+					PlayUI playUI = new PlayUI(finalNickname);
+					playUI.setVisible(true);
 				});
+                // --- PlayUI 호출 끝 ---
+
 			} else {
 				errorLabel.setVisible(true);
 			}
-		});
+		}); // end of loginBtn.addActionListener
 
 		signupBtn.addActionListener(e -> {
 			frame.dispose();
