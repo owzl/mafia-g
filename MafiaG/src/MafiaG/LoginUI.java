@@ -159,10 +159,22 @@ public class LoginUI {
 				try {
 					System.out.println("서버 실행 시도");
 
-					String classPath = "bin";
-					ProcessBuilder pb = new ProcessBuilder("java", "-cp", classPath, "MafiaG.Server");
-					pb.inheritIO(); // 콘솔 출력을 공유
+//					String classPath = "bin";
+//					ProcessBuilder pb = new ProcessBuilder("java", "-cp", classPath, "MafiaG.Server");
+//					pb.inheritIO(); // 콘솔 출력을 공유
+//					pb.start();
+					
+					// 안통함
+					String jdbcPath = "lib/mysql-connector-java-9.2.0.jar";
+					ProcessBuilder pb = new ProcessBuilder(
+					    "java",
+					    "-cp",
+					    "bin;" + jdbcPath,
+					    "MafiaG.Server"
+					);
+					pb.inheritIO(); // 콘솔 출력을 현재 프로세스와 공유
 					pb.start();
+
 
 					System.out.println("서버 실행 성공");
 					

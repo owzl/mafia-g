@@ -252,7 +252,7 @@ public class PlayUI extends JFrame implements ActionListener {
 
 	private void connectToServer() {
 		try {
-			sock = new Socket("172.30.1.32", 3579);
+			sock = new Socket("172.30.1.47", 3579);
 			br = new BufferedReader(new InputStreamReader(sock.getInputStream(), StandardCharsets.UTF_8));
 			bw = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream(), StandardCharsets.UTF_8));
 

@@ -19,7 +19,7 @@ public class DatabaseManager {
 	private static final String USER = "dbeaver_user";
 	public static String PASSWORD = "0000";
 
-	// ·Î±×ÀÎ
+	// ë¡œê·¸ì¸
 	public static String checkLogin(String id, String password) {
 		String sql = "SELECT * FROM member WHERE member_id = ? AND password = ?";
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -40,7 +40,7 @@ public class DatabaseManager {
 		}
 	}
 
-	// ¾ÆÀÌµğ Ã£±â
+	// ì•„ì´ë”” ì°¾ê¸°
 	public static String findMemberIdByEmail(String email) {
 		String sql = "SELECT member_id FROM member WHERE email = ?";
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -57,7 +57,7 @@ public class DatabaseManager {
 		return null;
 	}
 
-	// ºñ¹Ğ¹øÈ£ Ã£±â
+	// ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸°
 	public static boolean findPasswordByEmailAndId(String id, String email) {
 		String sql = "SELECT * FROM member WHERE member_id = ? AND email = ?";
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -73,7 +73,7 @@ public class DatabaseManager {
 		}
 	}
 
-	// ID Áßº¹ È®ÀÎ
+	// ID ì¤‘ë³µ í™•ì¸
 	public static boolean isIdDuplicate(String id) {
 		String sql = "SELECT COUNT(*) FROM member WHERE member_id = ?";
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -91,7 +91,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	// ´Ğ³×ÀÓ Áßº¹ È®ÀÎ
+	// ë‹‰ë„¤ì„ ì¤‘ë³µ í™•ì¸
 	public static boolean isNicknameDuplicate(String nickname) {
 		String sql = "SELECT COUNT(*) FROM member WHERE nickname = ?";
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -109,7 +109,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	// ÀÌ¸ŞÀÏ Áßº¹ È®ÀÎ
+	// ì´ë©”ì¼ ì¤‘ë³µ í™•ì¸
 	public static boolean isEmailDuplicate(String email) {
 		String sql = "SELECT COUNT(*) FROM member WHERE email = ?";
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -127,7 +127,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	// È¸¿ø °¡ÀÔ Ã³¸®
+	// íšŒì› ê°€ì… ì²˜ë¦¬
 	public static boolean insertNewMember(String id, String password, String nickname, String email) {
 		String sql = "INSERT INTO member (member_id, password, email, nickname) VALUES (?, ?, ?, ?)";
 
@@ -148,7 +148,7 @@ public class DatabaseManager {
 		}
 	}
 
-	// À¯ÀúÀÇ ÇöÀç Á¡¼ö °¡Á®¿À±â
+	// ìœ ì €ì˜ í˜„ì¬ ì ìˆ˜ ê°€ì ¸ì˜¤ê¸°
 	public static int getUserScore(String username) {
 		int score = 0;
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -166,33 +166,33 @@ public class DatabaseManager {
 		return score;
 	}
 
-	// °ÔÀÓ Á¾·á ÈÄ Á¡¼ö ¹İ¿µ (Gemini Á¦¿Ü, µ¿Á¡ÀÚ ¸ğµÎ ½Â¸® Ã³¸®)
+	// ê²Œì„ ì¢…ë£Œ í›„ ì ìˆ˜ ë°˜ì˜ (Gemini ì œì™¸, ë™ì ì ëª¨ë‘ ìŠ¹ë¦¬ ì²˜ë¦¬)
 	public static void updateScoresAfterGame(List<String> winners, List<String> participants) {
 	    try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-	        // Gemini°¡ µæÇ¥¼ö 1À§ÀÏ °æ¿ì
+	        // Geminiê°€ ë“í‘œìˆ˜ 1ìœ„ì¼ ê²½ìš°
 	        boolean geminiWins = winners.contains("Gemini");
 
-	        // Âü°¡ÀÚµé Á¡¼ö ¾÷µ¥ÀÌÆ®
+	        // ì°¸ê°€ìë“¤ ì ìˆ˜ ì—…ë°ì´íŠ¸
 	        for (String player : participants) {
-	            if (player.equals("Gemini")) continue;  // Gemini´Â Á¦¿Ü
+	            if (player.equals("Gemini")) continue;  // GeminiëŠ” ì œì™¸
 
 	            int scoreChange = 0;
 
 	            if (geminiWins) {
-	                // Gemini°¡ ½Â¸®ÇÑ °æ¿ì: ¸ğµç Âü°¡ÀÚ¿¡°Ô -2Á¡ ºÎ¿©
+	                // Geminiê°€ ìŠ¹ë¦¬í•œ ê²½ìš°: ëª¨ë“  ì°¸ê°€ìì—ê²Œ -2ì  ë¶€ì—¬
 	                scoreChange = -2;
 	            } else {
-	                // Âü¿©ÀÚ ½Â¸® ½Ã, µ¿Á¡ÀÚ Ã³¸®
+	                // ì°¸ì—¬ì ìŠ¹ë¦¬ ì‹œ, ë™ì ì ì²˜ë¦¬
 	                if (winners.contains(player)) {
-	                    // µ¿Á¡ÀÚ ½Â¸® ½Ã +3Á¡
+	                    // ë™ì ì ìŠ¹ë¦¬ ì‹œ +3ì 
 	                    scoreChange = 3;
 	                } else {
-	                    // ÆĞ¹èÀÚ¿¡°Ô -1Á¡
+	                    // íŒ¨ë°°ìì—ê²Œ -1ì 
 	                    scoreChange = -1;
 	                }
 	            }
 
-	            // Á¡¼ö ¾÷µ¥ÀÌÆ® Äõ¸®
+	            // ì ìˆ˜ ì—…ë°ì´íŠ¸ ì¿¼ë¦¬
 	            try (PreparedStatement pstmt = conn.prepareStatement(
 	                    "UPDATE member SET score = score + ? WHERE member_id = ?")) {
 	                pstmt.setInt(1, scoreChange);
@@ -208,7 +208,7 @@ public class DatabaseManager {
 
 
 
-	// ·Î±×¾Æ¿ô Ã³¸®
+	// ë¡œê·¸ì•„ì›ƒ ì²˜ë¦¬
 	public static void logoutUser(String username) {
 		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
 			 PreparedStatement pstmt = conn.prepareStatement(
@@ -221,7 +221,7 @@ public class DatabaseManager {
 		}
 	}
 
-	// ·©Å· »óÀ§ À¯Àú n¸í °¡Á®¿À±â
+	// ë­í‚¹ ìƒìœ„ ìœ ì € nëª… ê°€ì ¸ì˜¤ê¸°
 	public static List<UserScore> getTopRankers(int limit) {
 		List<UserScore> rankers = new ArrayList<>();
 		String sql = "SELECT nickname, score FROM member ORDER BY score DESC LIMIT ?";

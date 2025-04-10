@@ -3,6 +3,8 @@ package MafiaG;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import DB.DatabaseManager;
 import MafiaG.ConGemini;
 
 public class Server {
@@ -451,6 +453,10 @@ public class Server {
 
     // 새로운 라운드를 위한 타이머 설정
     static void startNewRoundTimer() {
+    	
+    	// 안 통함
+//    	Thread.currentThread().setContextClassLoader(DatabaseManager.class.getClassLoader());
+    	
         new Timer().schedule(new TimerTask() {
             public void run() {
                 // 20초 타이머 후, 자동으로 답변 공개
