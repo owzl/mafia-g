@@ -3,18 +3,15 @@ package MafiaG;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.regex.Pattern;
 
 public class SignupUI extends JFrame {
 
     public SignupUI(Runnable onSignupComplete) {
-        setTitle("MafiaG");
-        ImageIcon icon = new ImageIcon("src/img/logo.png"); // ·Î°í °æ·Î
-        setIconImage(icon.getImage());
+        setTitle("È¸¿ø°¡ÀÔ ÆäÀÌÁö");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 800);
         setLocationRelativeTo(null);
-        
+
         JPanel contentPane = new JPanel();
         contentPane.setBackground(new Color(248, 248, 248));
         contentPane.setLayout(new GridBagLayout());
@@ -43,13 +40,13 @@ public class SignupUI extends JFrame {
         formPanel.add(createInputGroup("´Ð³×ÀÓ", JTextField.class));
         formPanel.add(createInputGroup("ÀÌ¸ÞÀÏ", JTextField.class));
 
-        // È¸¿ø°¡ÀÔ ¹öÆ°
         JButton signupButton = new JButton("È¸¿ø°¡ÀÔ ¿Ï·á");
-        signupButton.setPreferredSize(new Dimension(260, 45));
+        signupButton.setPreferredSize(new Dimension(0, 45));
         signupButton.setBackground(new Color(204, 230, 255));
         signupButton.setForeground(new Color(68, 68, 68));
         signupButton.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 16));
         signupButton.setFocusPainted(false);
+        signupButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         signupButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         signupButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -62,88 +59,39 @@ public class SignupUI extends JFrame {
             }
         });
 
-        // µÚ·Î°¡±â ¹öÆ°
-        JButton backButton = new JButton("µÚ·Î°¡±â");
-        backButton.setPreferredSize(new Dimension(260, 45));
-        backButton.setBackground(new Color(224, 224, 224));
-        backButton.setForeground(new Color(68, 68, 68));
-        backButton.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 16));
-        backButton.setFocusPainted(false);
-        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                backButton.setBackground(new Color(200, 200, 200));
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                backButton.setBackground(new Color(224, 224, 224));
-            }
-        });
-
-        backButton.addActionListener(e -> {
-        	setVisible(false); // Ã¢À» ¼û±è
-        	LoginUI loginUI = new LoginUI();
-        	loginUI.showLoginUI();
-        	dispose();
-        });
-
-        // È¸¿ø°¡ÀÔ ¹öÆ° µ¿ÀÛ Á¤ÀÇ
         signupButton.addActionListener(e -> {
+            // ÀÔ·Â°ª °¡Á®¿À±â
             String id = ((JTextField)((JPanel) formPanel.getComponent(0)).getComponent(1)).getText();
             String pw = new String(((JPasswordField)((JPanel) formPanel.getComponent(1)).getComponent(1)).getPassword());
             String pwConfirm = new String(((JPasswordField)((JPanel) formPanel.getComponent(2)).getComponent(1)).getPassword());
             String nickname = ((JTextField)((JPanel) formPanel.getComponent(3)).getComponent(1)).getText();
             String email = ((JTextField)((JPanel) formPanel.getComponent(4)).getComponent(1)).getText();
 
-            if (id.length() < 4) {
-                JOptionPane.showMessageDialog(SignupUI.this, "¾ÆÀÌµð´Â 4ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.");
-                return;
-            }
-
-            if (pw.length() < 8) {
-                JOptionPane.showMessageDialog(SignupUI.this, "ºñ¹Ð¹øÈ£´Â 8ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.");
-                return;
-            }
-
+            // ºñ¹Ð¹øÈ£ È®ÀÎ
             if (!pw.equals(pwConfirm)) {
                 JOptionPane.showMessageDialog(SignupUI.this, "ºñ¹Ð¹øÈ£°¡ ÀÏÄ¡ÇÏÁö ¾Ê½À´Ï´Ù.");
                 return;
             }
 
-            if (Pattern.compile("[^a-zA-Z0-9°¡-ÆR]").matcher(nickname).find()) {
-                JOptionPane.showMessageDialog(SignupUI.this, "´Ð³×ÀÓ¿¡´Â Æ¯¼ö¹®ÀÚ¸¦ »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù.");
-                return;
-            }
-
-            if (!email.contains("@")) {
-                JOptionPane.showMessageDialog(SignupUI.this, "ÀÌ¸ÞÀÏ Çü½ÄÀÌ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù.");
-                return;
-            }
-
+            // DB¿¡ È¸¿øÁ¤º¸ ÀúÀå
             boolean success = DB.DatabaseManager.insertNewMember(id, pw, nickname, email);
 
             if (success) {
                 JOptionPane.showMessageDialog(SignupUI.this, "È¸¿ø°¡ÀÔÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù.");
-                dispose();
-                onSignupComplete.run();
+                dispose(); // Ã¢ ´Ý±â
+                onSignupComplete.run(); // ·Î±×ÀÎ È­¸éÀ¸·Î ÀÌµ¿
             } else {
                 JOptionPane.showMessageDialog(SignupUI.this, "È¸¿ø°¡ÀÔ¿¡ ½ÇÆÐÇß½À´Ï´Ù. ´Ù½Ã ½ÃµµÇØÁÖ¼¼¿ä.");
             }
-        });
-
-        // ¹öÆ° µÎ °³ ¼öÆò Á¤·Ä
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 20, 0));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(backButton);
-        buttonPanel.add(signupButton);
-
+        });	
+        
+        
         JPanel formContainer = new JPanel();
         formContainer.setOpaque(false);
         formContainer.setLayout(new BorderLayout(0, 20));
         formContainer.setBorder(new EmptyBorder(20, 20, 20, 20));
         formContainer.add(formPanel, BorderLayout.CENTER);
-        formContainer.add(buttonPanel, BorderLayout.SOUTH);
+        formContainer.add(signupButton, BorderLayout.SOUTH);
 
         centerBox.add(logoPanel, BorderLayout.NORTH);
         centerBox.add(formContainer, BorderLayout.CENTER);

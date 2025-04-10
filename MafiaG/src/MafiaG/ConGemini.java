@@ -1,30 +1,26 @@
 package MafiaG;
 
-import okhttp3.*;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 public class ConGemini {
-
     private static final String GEMINI_API_KEY = "AIzaSyBMbNZD6Q_zmzErjpfK_l9Ti7FMtzYAadA";
     private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=";
 
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .callTimeout(30, TimeUnit.SECONDS)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build();
-
     public static String getResponse(String userPrompt) throws IOException {
-        MediaType mediaType = MediaType.parse("application/json");
+        URL url = new URL(GEMINI_URL + GEMINI_API_KEY);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        String requestBody = "{\n" +
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        conn.setDoOutput(true);
+
+        String jsonInput = "{\n" +
                 "  \"contents\": [\n" +
                 "    {\n" +
                 "      \"parts\": [\n" +
-                "        {\n" +
-                "          \"text\": \"" + userPrompt + "\"\n" +
-                "        }\n" +
+                "        { \"text\": \"" + userPrompt + "\" }\n" +
                 "      ]\n" +
                 "    }\n" +
                 "  ],\n" +
@@ -33,21 +29,24 @@ public class ConGemini {
                 "  }\n" +
                 "}";
 
-        Request request = new Request.Builder()
-                .url(GEMINI_URL + GEMINI_API_KEY)
-                .post(RequestBody.create(mediaType, requestBody))
-                .addHeader("Content-jType", "application/json")
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            String responseBody = response.body().string();
-
-            if (!response.isSuccessful()) {
-                return "»ß»Ç»ß»Ç ¿À·ù»óÈ² ºñ»óºñ»ó: " + response.code() + "\n»ó¼¼ ³»¿ë: " + responseBody;
-            }
-
-            return extractTextFromResponse(responseBody);
+        try (OutputStream os = conn.getOutputStream()) {
+            byte[] input = jsonInput.getBytes(StandardCharsets.UTF_8);
+            os.write(input);
         }
+
+        int responseCode = conn.getResponseCode();
+        InputStream inputStream = (responseCode >= 200 && responseCode < 300)
+                ? conn.getInputStream() : conn.getErrorStream();
+
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+        }
+
+        return extractTextFromResponse(response.toString());
     }
 
     private static String extractTextFromResponse(String json) {
