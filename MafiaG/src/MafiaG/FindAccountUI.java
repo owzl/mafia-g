@@ -8,6 +8,8 @@ public class FindAccountUI extends JFrame {
     public FindAccountUI(Runnable backToLogin) {
         setTitle("아이디/비밀번호 찾기");
         setSize(1200, 800);
+        ImageIcon icon = new ImageIcon("src/img/logo.png"); // 로고 경로
+		setIconImage(icon.getImage());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -26,7 +28,7 @@ public class FindAccountUI extends JFrame {
         JPanel logoZone = new JPanel();
         logoZone.setOpaque(false);
         JLabel logoLabel = new JLabel();
-        ImageIcon logoIcon = new ImageIcon("../../MafiaG_logo.jpg");
+        ImageIcon logoIcon = new ImageIcon("src/img/logo.jpg");
         Image rawImage = logoIcon.getImage();
         double aspectRatio = (double) rawImage.getWidth(null) / rawImage.getHeight(null);
         int width = 200, height = (int)(200 / aspectRatio);
