@@ -19,14 +19,34 @@ public class Server {
     static final int MAX_QUESTIONS = 2;
 
     static List<String> questionList = Arrays.asList(
-        "오늘 점심으로 뭘 먹을까요?",
-        "당신이 제일 좋아하는 동물은?",
-        "주말에 뭐하면 좋을까요?",
-        "가장 기억에 남는 여행지는 어디인가요?",
-        "요즘 즐겨 듣는 음악은 뭔가요?",
-        "어릴 때 꿈은 무엇이었나요?",
-        "요즘 빠진 취미는?",
-        "혼자 여행 간다면 어디로 가고 싶나요?"
+    		 "오늘 점심으로 뭘 먹을까요?",
+    	        "당신이 제일 좋아하는 동물은?",
+    	        "주말에 뭐하면 좋을까요?",
+    	        "가장 기억에 남는 여행지는 어디인가요?",
+    	        "요즘 즐겨 듣는 음악은 뭔가요?",
+    	        "어릴 때 꿈은 무엇이었나요?",
+    	        "요즘 빠진 취미는?",
+    	        "당신은 Gemini인가요?",
+    	        "딥시크에 대해 어떻게 생각하나요?",
+    	        "스트레스를 받을 때 어떻게 해소하는 편인가요?",
+    	        "강아지 vs 고양이, 어느 쪽을 더 좋아하세요?",
+    	        "단맛 vs 짠맛?",
+    	        "무서운 이야기나 영화를 잘 보는 편인가요?",
+    	        "지금 바로 여행을 갈 수 있다면 가고 싶은 곳은? (국내/해외 상관없이)",
+    	        "가장 좋아하는 요일과 그 이유는?",
+    	        "당신이 갖고 싶은 초능력은?",
+    	        "알람 소리 없이 아침에 잘 일어나나요?",
+    	        "달콤한 음료 vs 달지 않은 음료?",
+    	        "새 옷 사기 vs 새 신발 사기, 하나만 고른다면?",
+    	        "오늘 아침에 일어나서 가장 먼저 한 일은 무엇인가요?",
+    	        "자신은 계획적인 사람과 즉흥적인 사람 중 어디에 더 가깝다고 생각하나요?",
+    	        "가장 좋아하는 아이스크림 맛은?",
+    	        "영화관에서 영화 보기 vs 집에서 영화 보기?",
+    	        "기억에 남는 영화나 드라마는?",
+    	        "손글씨와 키보드 타이핑 어떤게 편하신가요?",
+    	        "투명인간이 된다면 무엇을 하고싶으신가요?",
+    	        "당신의 OOTD에 대해 설명해 주세요!",
+    	        "커피 vs 차"
     );
     static List<String> usedQuestions = new ArrayList<>();
     static Random random = new Random();
@@ -46,7 +66,7 @@ public class Server {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                socket.setSoTimeout(60000);
+                socket.setSoTimeout(600000);
                 if (clients.size() >= MAX_CLIENTS) {
                     socket.close();
                     continue;
@@ -80,13 +100,37 @@ public class Server {
     static void broadcastParticipants() {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"type\":\"PARTICIPANTS\",\"list\":[");
-        for (int i = 0; i < clients.size(); i++) {
-            sb.append("{\"nickname\":\"").append(clients.get(i).nickname)
-              .append("\",\"color\":\"").append(clients.get(i).colorCode).append("\"}");
-            if (i != clients.size() - 1) sb.append(",");
+        boolean firstEntry = true;
+        // 클라이언트 목록 복사 후 순회 (동시성 문제 방지 - 더 안전하게 하려면 Collections.synchronizedList 사용 고려)
+        List<ClientHandler> currentClients = new ArrayList<>(clients);
+        for (ClientHandler client : currentClients) {
+            // --- ❗ 닉네임 결정 로직 추가 ❗ ---
+            String displayName;
+            if (client instanceof GeminiBot) {
+                displayName = "Gemini"; // Gemini 봇은 "Gemini"로 표시
+            } else if (client.permanentNickname != null && !client.permanentNickname.isEmpty()) {
+                displayName = client.permanentNickname; // 실제 닉네임이 있으면 사용
+            } else {
+                displayName = client.nickname; // 실제 닉네임 없으면 임시 닉네임 사용 (IDENTIFY 전 등)
+                // IDENTIFY가 정상적으로 이루어졌다면 이 경우는 거의 발생하지 않아야 함
+                System.out.println("[서버 경고] broadcastParticipants: 클라이언트(" + client.nickname + ")의 permanentNickname 없음.");
+            }
+            String color = client.colorCode;
+            // --- 닉네임 결정 로직 끝 ---
+
+            // 첫 항목 아니면 콤마 추가
+            if (!firstEntry) {
+                sb.append(",");
+            }
+            // JSON에 displayName 사용 및 escape 처리
+            sb.append("{\"nickname\":\"").append(escapeJson(displayName))
+              .append("\",\"color\":\"").append(color).append("\"}");
+            firstEntry = false;
         }
         sb.append("]}");
-        broadcast(sb.toString());
+        String messageToSend = sb.toString(); // 최종 메시지
+        System.out.println("[서버] 브로드캐스팅 PARTICIPANTS: " + messageToSend); // 전송 내용 로그
+        broadcast(messageToSend); // 모든 클라이언트에게 전송
     }
 
     
@@ -294,15 +338,6 @@ public class Server {
         // 점수 업데이트 로직 호출 (실제 닉네임 리스트 전달)
         updateScores(winnerPermNicknames, participantPermNicknames); // <<--- 파라미터 변경됨!
 
-        // --- ❗ 게임 상태 리셋 로직 추가 ❗ ---
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                System.out.println("[서버] 게임 상태 초기화 수행...");
-                resetGameState(); // 게임 상태 리셋
-            }
-        }, 5000); // 예: 5초 후 리셋 (결과 확인 시간 부여)
-        // --- 리셋 로직 끝 ---
     }
 
 
@@ -499,35 +534,7 @@ public class Server {
         int end = json.indexOf("\"", start + 1);
         return json.substring(start + 1, end);
     }
-    
- // 기존 코드 아래에 추가
-    static void handleTryAgain() {
-        // 게임 상태 초기화
-        resetGameState();
-
-        // 새로운 게임 시작 메시지 브로드캐스트
-        broadcast("{\"type\":\"GAME_START\"}");
-
-        // 새로운 질문을 시작
-        startNextQuestion();
-        
-        // 타이머를 새로 설정
-        startNewRoundTimer();
-    }
-
-    // 게임 상태 초기화 메서드
-    static void resetGameState() {
-        questionCount = 0;
-        usedQuestions.clear();
-        totalVoteMap.clear(); // 누적 투표 초기화
-        voteMap.clear();
-        votedUsers.clear();
-        answers.clear();
-        resultRevealed = false;
-        gameStarted = false;
-        readyCount = 0; // <<<--- 준비 카운트 초기화 추가!
-        System.out.println("[서버] 게임 상태가 초기화되었습니다.");
-    }
+  
 
     // 새로운 라운드를 위한 타이머 설정
     static void startNewRoundTimer() {
